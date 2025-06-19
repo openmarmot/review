@@ -6,18 +6,16 @@ notes :
 CLI took to create AI generated reviews of files
 '''
 
-#!/usr/bin/env python3
 import os
 import argparse
 import sys
-from datetime import datetime
 import requests
 import json
 
 
 #------------------------------------------------------------------------------
 def create_ai_vars_file(file_path):
-    '''generate the ai variables file'''
+    '''create the ai variables file'''
     vars={}
     vars['model']='x-ai/grok-3-mini-beta'
     vars['api_key']=input('Enter your API key:')
@@ -69,6 +67,12 @@ def generate_prompt(file_path):
 #------------------------------------------------------------------------------
 def generate_review(file_path):
     '''all the code needed to generate the review'''
+    
+    print("========================================")
+    print(f'Generating code review for:')
+    print(file_path)
+    print('One moment..')
+    print("========================================")
 
     # first lets get or create the ai parameters
     # create or load ai variables
@@ -98,12 +102,6 @@ def generate_review(file_path):
             
         })
     )
-
-    print("========================================")
-    print(f'Generating code review for:')
-    print(file_path)
-    print('One moment..')
-    print("========================================")
 
     response=response.json()
     # Extract specific sections
@@ -158,6 +156,7 @@ def read_file_content(file_path):
 
 #------------------------------------------------------------------------------
 def main():
+    '''entry point'''
     print("========================================")
     print("OpenMarmot Code Review")
     print("https://github.com/openmarmot/review")
@@ -196,6 +195,7 @@ def main():
 
 #------------------------------------------------------------------------------
 def write_dict_to_file(dictionary, file_path):
+    '''write a dictionary to a file in line=key:value syntax '''
     try:
         with open(file_path, 'w') as file:
             for key, value in dictionary.items():
