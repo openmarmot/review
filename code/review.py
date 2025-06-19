@@ -99,6 +99,12 @@ def generate_review(file_path):
         })
     )
 
+    print("========================================")
+    print(f'Generating code review for:')
+    print(file_path)
+    print('One moment..')
+    print("========================================")
+
     response=response.json()
     # Extract specific sections
     # Extract sections
@@ -106,10 +112,17 @@ def generate_review(file_path):
     usage = response["usage"]
 
     # Print content with newlines interpreted
-    print("Content:")
+    print("========================================")
+    print("Code Review")
+    print("========================================")
     print(content)  # \n becomes actual line breaks
-    print("\nUsage:")  # Separator for clarity
+    print("========================================")
+    print("API Usage Data")
+    print("========================================")
     print(json.dumps(usage, indent=2))
+    print("========================================")
+    print('Have a nice day!')
+    print("========================================")
 
 
 
@@ -145,6 +158,10 @@ def read_file_content(file_path):
 
 #------------------------------------------------------------------------------
 def main():
+    print("========================================")
+    print("OpenMarmot Code Review")
+    print("https://github.com/openmarmot/review")
+    print("========================================")
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Read contents of a file or find and read the most recent .py or .js file")
     parser.add_argument('filename', nargs='?', help="Optional file to read")
@@ -165,6 +182,10 @@ def main():
         file_path=args.filename
     else:
         # If no filename, search for most recently modified .py or .js file
+        print("========================================")
+        print('Checking for most recent code file')
+        print('One moment..')
+        print("========================================")
         found_file = find_most_recent_file(os.getcwd(), VALID_EXTENSIONS)
         if not found_file:
             print("Error: No .py or .js files found in directory", file=sys.stderr)
