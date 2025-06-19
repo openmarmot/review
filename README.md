@@ -1,5 +1,5 @@
 # review
-CLI tool to create AI reviews of files
+CLI tool to create AI code reviews for individual files
 
 This a simple command line tool that uses AI to generate code reviews of individal files.  
 It is designed to be fast and simple to use so that it can easily be added to a development 
