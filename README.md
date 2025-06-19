@@ -41,8 +41,8 @@ r file.py
 r folder/file.py
 ```
 
-### Cost
-Reviewing a 3000 line file is currently costing me around $0.017 USD. Cost will change based on file size and API costs.
-
+### Example
+This is the result of running the program against a 3000 line python file.  
+The API cost for this was 0.016 USD.  
 ![screenshot](/screenshots/output_jun_19.png "Review output")
 
