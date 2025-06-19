@@ -44,5 +44,5 @@ r folder/file.py
 ### Cost
 Reviewing a 3000 line file is currently costing me around $0.017 USD. Cost will change based on file size and API costs.
 
-![screenshot](/screenshots/Screenshot From 2025-06-19 13-28-56.png "Review output")
+![screenshot](/screenshots/output_jun_19.png "Review output")
 
