@@ -17,7 +17,7 @@ import json
 def create_ai_vars_file(file_path):
     '''create the ai variables file'''
     vars={}
-    vars['model']='x-ai/grok-3-mini-beta'
+    vars['model']='x-ai/grok-4'
     vars['api_key']=input('Enter your API key:')
     vars['api_url']='https://openrouter.ai/api/v1/chat/completions'
 

@@ -1,0 +1,6 @@
+----------------------------------
+July 10 2025
+- switched from grok-3-mini-beta to grok-4 
+
+grok-3-mini was about 1 cent, and grok-4 is about 11 cents. 
+I think the upgrade is worth it. It is easy to switch via the config file 

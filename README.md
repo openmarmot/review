@@ -5,12 +5,13 @@ This a simple command line tool that uses AI to generate code reviews of individ
 It is designed to be fast and simple to use so that it can easily be added to a development 
 workflow in a similar way to conventional tools like pylint.
 
+Defaults  
 API : openrouter.ai  
-MODEL : XAI Grok3 Mini
+MODEL : XAI Grok4
 
-Openrouter has the advantage of providing a standardized API for a wide variety of models, and it also makes key management very easy.  
+Openrouter has the advantage of providing a standardized API for a wide variety of models, and it also makes key management very easy.
+You may want to switch to a mini model depending on your use case.
 
-Grok3 mini is a cost efficent reasoning model with a large context that performs well for this use case.  
 
 ### Setup
 PreReqs: Python3. No additional packages are needed.
@@ -43,6 +44,6 @@ r folder/file.py
 
 ### Example
 This is the result of running the program against a 3000 line python file.  
-The API cost for this was 0.016 USD.  
+The API cost for this was 0.016 USD using Grok-3-Mini.  
 ![screenshot](/screenshots/output_jun_19.png "Review output")
 
