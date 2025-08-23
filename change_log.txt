@@ -1,4 +1,8 @@
 ----------------------------------
+August 22 2025
+- added support for most common languages  
+
+----------------------------------
 July 10 2025
 - switched from grok-3-mini-beta to grok-4 
 

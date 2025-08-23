@@ -3,7 +3,7 @@
 repo : https://github.com/openmarmot/review
 email : andrew@openmarmot.com
 notes :
-CLI took to create AI generated reviews of files
+CLI tool to create AI generated reviews of files
 '''
 
 import os
@@ -12,6 +12,26 @@ import sys
 import requests
 import json
 
+# Global dictionary mapping file extensions to language names
+SUPPORTED_LANGUAGES = {
+    '.py': 'python',
+    '.js': 'javascript',
+    '.ts': 'typescript',
+    '.java': 'java',
+    '.cpp': 'cpp',
+    '.c': 'c',
+    '.h': 'c',  # Treat headers as C for simplicity; adjust if needed for C++
+    '.cs': 'csharp',
+    '.go': 'go',
+    '.rs': 'rust',
+    '.rb': 'ruby',
+    '.php': 'php',
+    '.html': 'html',
+    '.css': 'css',
+    '.yml': 'yaml',
+    '.yaml': 'yaml',
+    '.sh': 'bash',
+}
 
 #------------------------------------------------------------------------------
 def create_ai_vars_file(file_path):
@@ -45,17 +65,19 @@ def find_most_recent_file(start_dir, extensions):
 #------------------------------------------------------------------------------
 def generate_prompt(file_path):
     code_content=read_file_content(file_path)
-    code_type='code'
-    if '.py' in file_path:
-        code_type='python'
+    
+    # Get language from file extension
+    ext = os.path.splitext(file_path)[1].lower()
+    code_type = SUPPORTED_LANGUAGES.get(ext, 'code')  # Default to 'code' for unknown extensions
+    
     prompt = (
-    "Please review the following code:\n\n"
+    "Please review the following code or configuration:\n\n"
     f"```{code_type}\n"
     f"{code_content}\n"
     "```\n\n"
-    "Provide a code review, focusing on these issues in order of importance:\n"
+    "Provide a review, focusing on these issues in order of importance:\n"
     "- Syntax errors\n"
-    "- Logic errors\n"
+    "- Logic errors (if applicable)\n"
     "- Other critical issues\n"
     "- Style improvements\n"
     "- Other suggestions\n"
@@ -69,14 +91,12 @@ def generate_review(file_path):
     '''all the code needed to generate the review'''
     
     print("========================================")
-    print(f'Generating code review for:')
+    print(f'Generating review for:')
     print(file_path)
     print('One moment..')
     print("========================================")
 
-    # first lets get or create the ai parameters
     # create or load ai variables
-    # Get the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     ai_variable_file = os.path.join(script_dir, 'review_ai_variables.txt')
     ai_vars=get_dict_from_file(ai_variable_file)
@@ -104,16 +124,13 @@ def generate_review(file_path):
     )
 
     response=response.json()
-    # Extract specific sections
-    # Extract sections
     content = response["choices"][0]["message"]["content"]
     usage = response["usage"]
 
-    # Print content with newlines interpreted
     print("========================================")
-    print("Code Review")
+    print("Review")
     print("========================================")
-    print(content)  # \n becomes actual line breaks
+    print(content)
     print("========================================")
     print("API Usage Data")
     print("========================================")
@@ -122,8 +139,6 @@ def generate_review(file_path):
     print('Have a nice day!')
     print("========================================")
 
-
-
 #------------------------------------------------------------------------------
 def get_dict_from_file(file_path):
     '''generate a dictionary from a file'''
@@ -131,7 +146,6 @@ def get_dict_from_file(file_path):
     try:
         with open(file_path, 'r') as file:
             for line in file:
-                # Remove whitespace and split on first colon
                 line = line.strip()
                 if line:  # Skip empty lines
                     key, value = line.split(':', 1)
@@ -161,33 +175,33 @@ def main():
     print("OpenMarmot Code Review")
     print("https://github.com/openmarmot/review")
     print("========================================")
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description="Read contents of a file or find and read the most recent .py or .js file")
+    parser = argparse.ArgumentParser(description="Read contents of a file or find and read the most recent supported file")
     parser.add_argument('filename', nargs='?', help="Optional file to read")
     
-    # Parse arguments
     args = parser.parse_args()
 
-    # Valid extensions
-    VALID_EXTENSIONS = ['.py', '.js']
+    # Use keys from SUPPORTED_LANGUAGES as valid extensions
+    valid_extensions = list(SUPPORTED_LANGUAGES.keys())
     
     file_path=None
 
     if args.filename:
-        # If filename is provided, read that file
+        ext = os.path.splitext(args.filename)[1].lower()
+        if ext not in valid_extensions:
+            print(f"Error: Unsupported file extension {ext}. Supported: {', '.join(valid_extensions)}", file=sys.stderr)
+            sys.exit(1)
         if not os.path.isfile(args.filename):
             print(f"Error: {args.filename} does not exist", file=sys.stderr)
             sys.exit(1)
         file_path=args.filename
     else:
-        # If no filename, search for most recently modified .py or .js file
         print("========================================")
-        print('Checking for most recent code file')
+        print('Checking for most recent supported file')
         print('One moment..')
         print("========================================")
-        found_file = find_most_recent_file(os.getcwd(), VALID_EXTENSIONS)
+        found_file = find_most_recent_file(os.getcwd(), valid_extensions)
         if not found_file:
-            print("Error: No .py or .js files found in directory", file=sys.stderr)
+            print(f"Error: No supported files found in directory. Supported extensions: {', '.join(valid_extensions)}", file=sys.stderr)
             sys.exit(1)
         file_path=found_file
 
@@ -199,7 +213,6 @@ def write_dict_to_file(dictionary, file_path):
     try:
         with open(file_path, 'w') as file:
             for key, value in dictionary.items():
-                # Ensure key and value are strings and write in key:value format
                 file.write(f"{key}:{value}\n")
         return True
     except Exception as e:
