@@ -1,4 +1,13 @@
 ----------------------------------
+August 26 2025
+- switched default model to x-ai/grok-code-fast-1
+- minor cleanup/changes
+
+grok-code-fast is looking like a good fit for this project. 
+grok-4's brains were useful, but i think speed is more what i want from this 
+tool. 
+
+----------------------------------
 August 22 2025
 - added support for most common languages  
 

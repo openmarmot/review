@@ -37,7 +37,7 @@ SUPPORTED_LANGUAGES = {
 def create_ai_vars_file(file_path):
     '''create the ai variables file'''
     vars={}
-    vars['model']='x-ai/grok-4'
+    vars['model']='x-ai/grok-code-fast-1'
     vars['api_key']=input('Enter your API key:')
     vars['api_url']='https://openrouter.ai/api/v1/chat/completions'
 
@@ -90,18 +90,16 @@ def generate_prompt(file_path):
 def generate_review(file_path):
     '''all the code needed to generate the review'''
     
-    print("========================================")
-    print(f'Generating review for:')
-    print(file_path)
-    print('One moment..')
-    print("========================================")
-
     # create or load ai variables
     script_dir = os.path.dirname(os.path.abspath(__file__))
     ai_variable_file = os.path.join(script_dir, 'review_ai_variables.txt')
     ai_vars=get_dict_from_file(ai_variable_file)
     if not ai_vars:
         ai_vars=create_ai_vars_file(ai_variable_file)
+
+    print(f'Ai Model : {ai_vars['model']}')
+    print(f'Generating review for: {file_path}')
+    print("========================================")
 
     prompt=generate_prompt(file_path)
 
@@ -127,9 +125,7 @@ def generate_review(file_path):
     content = response["choices"][0]["message"]["content"]
     usage = response["usage"]
 
-    print("========================================")
-    print("Review")
-    print("========================================")
+    print('review:')
     print(content)
     print("========================================")
     print("API Usage Data")
@@ -173,8 +169,7 @@ def main():
     '''entry point'''
     print("========================================")
     print("OpenMarmot Code Review")
-    print("https://github.com/openmarmot/review")
-    print("========================================")
+    print("Project : https://github.com/openmarmot/review")
     parser = argparse.ArgumentParser(description="Read contents of a file or find and read the most recent supported file")
     parser.add_argument('filename', nargs='?', help="Optional file to read")
     
@@ -195,10 +190,7 @@ def main():
             sys.exit(1)
         file_path=args.filename
     else:
-        print("========================================")
-        print('Checking for most recent supported file')
-        print('One moment..')
-        print("========================================")
+        print('Checking for most recent supported file..')
         found_file = find_most_recent_file(os.getcwd(), valid_extensions)
         if not found_file:
             print(f"Error: No supported files found in directory. Supported extensions: {', '.join(valid_extensions)}", file=sys.stderr)
