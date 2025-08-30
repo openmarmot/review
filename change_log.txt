@@ -1,4 +1,9 @@
 ----------------------------------
+August 29 2025
+- updated prompt 
+- minor chages
+
+----------------------------------
 August 26 2025
 - switched default model to x-ai/grok-code-fast-1
 - minor cleanup/changes

@@ -64,6 +64,7 @@ def find_most_recent_file(start_dir, extensions):
 
 #------------------------------------------------------------------------------
 def generate_prompt(file_path):
+    '''generates the full prompt including file data'''
     code_content=read_file_content(file_path)
     
     # Get language from file extension
@@ -72,17 +73,15 @@ def generate_prompt(file_path):
     
     prompt = (
     "Please review the following code or configuration:\n\n"
+    "Structure your response as a numbered list of up to 10 issues, prioritized by:"
+    "Syntax errors (with line numbers if possible).\n"
+    "Logic errors or bugs (explain impact and suggest fixes with code snippets).\n"
+    "Security vulnerabilities or performance issues.\n"
+    "Style and best practices (reference standards like PEP8 for Python).\n"
+    "Other improvements (e.g., readability, modularity).\n"
     f"```{code_type}\n"
     f"{code_content}\n"
     "```\n\n"
-    "Provide a review, focusing on these issues in order of importance:\n"
-    "- Syntax errors\n"
-    "- Logic errors (if applicable)\n"
-    "- Other critical issues\n"
-    "- Style improvements\n"
-    "- Other suggestions\n"
-    "If you find more than 10 issues, only report on 10 sorted with the above ranking.\n"
-    "Your response will be read from a terminal, so keep lines short.\n"
     )
     return prompt
 
@@ -93,47 +92,68 @@ def generate_review(file_path):
     # create or load ai variables
     script_dir = os.path.dirname(os.path.abspath(__file__))
     ai_variable_file = os.path.join(script_dir, 'review_ai_variables.txt')
-    ai_vars=get_dict_from_file(ai_variable_file)
+    ai_vars = get_dict_from_file(ai_variable_file)
     if not ai_vars:
-        ai_vars=create_ai_vars_file(ai_variable_file)
+        ai_vars = create_ai_vars_file(ai_variable_file)
 
     print(f'Ai Model : {ai_vars['model']}')
     print(f'Generating review for: {file_path}')
     print("========================================")
 
-    prompt=generate_prompt(file_path)
+    prompt = generate_prompt(file_path)
 
-    response = requests.post(
-        url=ai_vars['api_url'],
-        headers={
-            "Authorization": f"Bearer {ai_vars['api_key']}",
-            "Content-Type": "application/json",
-        },
-        data=json.dumps({
-            "model": ai_vars['model'],
-            "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-            ],
-            
-        })
-    )
+    try:
+        response = requests.post(
+            url=ai_vars['api_url'],
+            headers={
+                "Authorization": f"Bearer {ai_vars['api_key']}",
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "model": ai_vars['model'],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+            })
+        )
+        
+        # Raise an exception if the request failed (non-2xx status)
+        response.raise_for_status()
+        
+        # Parse JSON
+        response_data = response.json()
+        
+        # Access content and usage safely
+        content = response_data["choices"][0]["message"]["content"]
+        usage = response_data["usage"]
 
-    response=response.json()
-    content = response["choices"][0]["message"]["content"]
-    usage = response["usage"]
+        print('review:')
+        print(content)
+        print("========================================")
+        print("API Usage Data")
+        print("========================================")
+        print(json.dumps(usage, indent=2))
+        print("========================================")
+        print('Have a nice day!')
+        print("========================================")
 
-    print('review:')
-    print(content)
-    print("========================================")
-    print("API Usage Data")
-    print("========================================")
-    print(json.dumps(usage, indent=2))
-    print("========================================")
-    print('Have a nice day!')
-    print("========================================")
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}", file=sys.stderr)
+        sys.exit(1)
+    except (KeyError, IndexError) as e:
+        print(f"Unexpected API response structure: {e}", file=sys.stderr)
+        print(f"Raw response: {response.text}", file=sys.stderr)  # For debugging
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON response: {e}", file=sys.stderr)
+        print(f"Raw response: {response.text}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 #------------------------------------------------------------------------------
 def get_dict_from_file(file_path):
@@ -176,7 +196,7 @@ def main():
     args = parser.parse_args()
 
     # Use keys from SUPPORTED_LANGUAGES as valid extensions
-    valid_extensions = list(SUPPORTED_LANGUAGES.keys())
+    valid_extensions = SUPPORTED_LANGUAGES.keys()
     
     file_path=None
 
